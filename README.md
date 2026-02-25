@@ -73,7 +73,7 @@ You can now use Quickwarden to search through your vault!
 ## Building from source
 ### Development
 For development, you'll need the following:
-- .NET 9 SDK
+- .NET 10 SDK
 - Bitwarden CLI (must be in your PATH environment variable)
 
 The source code in the `src` directory consists of the following projects:
