@@ -20,8 +20,8 @@ internal class Decryptor
         await using var outputStream = new MemoryStream();
         await using (var cryptoStream =
                      new CryptoStream(outputStream,
-                                      aes.CreateDecryptor(),
-                                      CryptoStreamMode.Write))
+                         aes.CreateDecryptor(),
+                         CryptoStreamMode.Write))
         {
             cryptoStream.Write(encrypted, 0, encrypted.Length);
         }

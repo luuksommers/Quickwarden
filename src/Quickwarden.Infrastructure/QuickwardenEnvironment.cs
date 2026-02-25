@@ -6,8 +6,9 @@ namespace Quickwarden.Infrastructure;
 
 public class QuickwardenEnvironment : IQuickwardenEnvironment
 {
-    private readonly static string AppDataPath =
+    private static readonly string AppDataPath =
         Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Quickwarden");
+
     public static string ConfigPath { get; } = Path.Join(AppDataPath, "config.bin");
     public static string VaultsPath { get; } = Path.Join(AppDataPath, "vaults");
 

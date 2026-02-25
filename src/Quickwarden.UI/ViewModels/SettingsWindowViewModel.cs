@@ -22,11 +22,18 @@ public class AccountModel
 
 public partial class SettingsWindowViewModel : ViewModelBase
 {
-    private readonly SettingsWindow _settingsWindow;
     private readonly ApplicationController _applicationController;
-    private SignInWindow? _signInWindow;
-    private AccountModel? _selectedAccount;
+    private readonly SettingsWindow _settingsWindow;
     private bool _isLoading;
+    private AccountModel? _selectedAccount;
+    private SignInWindow? _signInWindow;
+
+    public SettingsWindowViewModel(SettingsWindow settingsWindow, ApplicationController applicationController)
+    {
+        _settingsWindow = settingsWindow;
+        _applicationController = applicationController;
+    }
+
     public AccountModel? SelectedAccount
     {
         get => _selectedAccount;
@@ -37,6 +44,7 @@ public partial class SettingsWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(RemoveButtonEnabled));
         }
     }
+
     public bool IsLoading
     {
         get => _isLoading;
@@ -47,20 +55,15 @@ public partial class SettingsWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(RemoveButtonEnabled));
         }
     }
+
     public bool RemoveButtonEnabled => SelectedAccount != null && !IsLoading;
 
     public AccountModel[] Accounts => _applicationController.GetAccounts().Select(account =>
         new AccountModel
         {
             Id = account.Id,
-            Username = account.Username,
+            Username = account.Username
         }).ToArray();
-
-    public SettingsWindowViewModel(SettingsWindow settingsWindow, ApplicationController applicationController)
-    {
-        _settingsWindow = settingsWindow;
-        _applicationController = applicationController;
-    }
 
     [RelayCommand]
     private void Hide()
@@ -75,7 +78,6 @@ public partial class SettingsWindowViewModel : ViewModelBase
             "Are you sure you want to remove this account?", ButtonEnum.YesNo, Icon.Question);
         var result = await messageBox.ShowWindowDialogAsync(_settingsWindow);
         if (result == ButtonResult.Yes && SelectedAccount != null)
-        {
             Task.Run(async () =>
             {
                 Dispatcher.UIThread.Invoke(() => IsLoading = true);
@@ -83,7 +85,6 @@ public partial class SettingsWindowViewModel : ViewModelBase
                 Dispatcher.UIThread.Invoke(RefreshAccounts);
                 Dispatcher.UIThread.Invoke(() => IsLoading = false);
             });
-        }
     }
 
     [RelayCommand]

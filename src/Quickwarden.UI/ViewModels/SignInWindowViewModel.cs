@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.InteropServices.JavaScript;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -15,14 +14,24 @@ namespace Quickwarden.UI.ViewModels;
 public partial class SignInWindowViewModel : ViewModelBase
 {
     private readonly ApplicationController _applicationController;
-    private readonly SignInWindow _signInWindow;
     private readonly SettingsWindowViewModel _settingsWindow;
-    private bool _isLoading;
+    private readonly SignInWindow _signInWindow;
     private string _errorMessage = string.Empty;
-    private string _username = string.Empty;
-    private string _password = string.Empty;
+    private bool _isLoading;
     private bool _needs2Fa;
+    private string _password = string.Empty;
     private string _totp = string.Empty;
+    private string _username = string.Empty;
+
+    public SignInWindowViewModel(ApplicationController applicationController,
+        SignInWindow signInWindow,
+        SettingsWindowViewModel settingsWindow)
+    {
+        _applicationController = applicationController;
+        _signInWindow = signInWindow;
+        _settingsWindow = settingsWindow;
+    }
+
     public bool Needs2Fa
     {
         get => _needs2Fa;
@@ -32,6 +41,7 @@ public partial class SignInWindowViewModel : ViewModelBase
             OnPropertyChanged();
         }
     }
+
     public bool IsLoading
     {
         get => _isLoading;
@@ -41,6 +51,7 @@ public partial class SignInWindowViewModel : ViewModelBase
             OnPropertyChanged();
         }
     }
+
     public string ErrorMessage
     {
         get => _errorMessage;
@@ -50,6 +61,7 @@ public partial class SignInWindowViewModel : ViewModelBase
             OnPropertyChanged();
         }
     }
+
     public string Username
     {
         get => _username;
@@ -59,6 +71,7 @@ public partial class SignInWindowViewModel : ViewModelBase
             OnPropertyChanged();
         }
     }
+
     public string Password
     {
         get => _password;
@@ -68,7 +81,7 @@ public partial class SignInWindowViewModel : ViewModelBase
             OnPropertyChanged();
         }
     }
-    
+
     public string Totp
     {
         get => _totp;
@@ -77,15 +90,6 @@ public partial class SignInWindowViewModel : ViewModelBase
             _totp = value;
             OnPropertyChanged();
         }
-    }
-
-    public SignInWindowViewModel(ApplicationController applicationController,
-                                 SignInWindow signInWindow,
-                                 SettingsWindowViewModel settingsWindow)
-    {
-        _applicationController = applicationController;
-        _signInWindow = signInWindow;
-        _settingsWindow = settingsWindow;
     }
 
     [RelayCommand]
@@ -97,9 +101,9 @@ public partial class SignInWindowViewModel : ViewModelBase
             try
             {
                 var result = await _applicationController.SignIn(Username,
-                                                                 Password,
-                                                                 Totp,
-                                                                 CancellationToken.None);
+                    Password,
+                    Totp,
+                    CancellationToken.None);
                 if (result == SignInResult.Success)
                 {
                     Dispatcher.UIThread.Invoke(() =>
@@ -123,25 +127,15 @@ public partial class SignInWindowViewModel : ViewModelBase
 
                 string errorMessage;
                 if (result == SignInResult.AlreadySignedIn)
-                {
                     errorMessage = "You are already signed in.";
-                }
                 else if (result == SignInResult.Missing2Fa)
-                {
                     errorMessage = "You are missing a 2FA.";
-                }
                 else if (result == SignInResult.Timeout)
-                {
                     errorMessage = "Time-out.";
-                }
                 else if (result == SignInResult.WrongCredentials)
-                {
                     errorMessage = "Wrong credentials.";
-                }
                 else
-                {
                     errorMessage = "Unknown error.";
-                }
 
                 Dispatcher
                     .UIThread
@@ -157,9 +151,9 @@ public partial class SignInWindowViewModel : ViewModelBase
                 {
                     IsLoading = false;
                     var box = MessageBoxManager.GetMessageBoxStandard("Error",
-                                                                      $"{e.Message}\r\n\r\n${e.StackTrace}",
-                                                                      ButtonEnum.Ok,
-                                                                      Icon.Error);
+                        $"{e.Message}\r\n\r\n${e.StackTrace}",
+                        ButtonEnum.Ok,
+                        Icon.Error);
                     await box.ShowWindowDialogAsync(_signInWindow);
                 });
             }

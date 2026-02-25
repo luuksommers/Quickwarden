@@ -10,7 +10,7 @@ public class SigningInTests
 {
     private readonly ApplicationFixture _fixture = new();
     private ApplicationController _applicationController;
-    
+
     public SigningInTests()
     {
         _applicationController = _fixture.CreateApplicationController();
@@ -33,8 +33,9 @@ public class SigningInTests
     {
         await _applicationController.Initialize();
         var firstUser = _fixture.BitwardenInstanceRepository.InstancesWithCredentials.First();
-        
-        var result = await _applicationController.SignIn(firstUser.Username, firstUser.Password, string.Empty, CancellationToken.None);
+
+        var result = await _applicationController.SignIn(firstUser.Username, firstUser.Password, string.Empty,
+            CancellationToken.None);
         Assert.Equal(SignInResult.Missing2Fa, result);
     }
 
@@ -45,7 +46,7 @@ public class SigningInTests
         var accounts = _applicationController.GetAccounts();
         Assert.Empty(accounts);
     }
-    
+
     [Fact]
     public async Task CorrectCredentialsHasAccounts()
     {
@@ -60,7 +61,8 @@ public class SigningInTests
     {
         await TestCorrectCredentials();
         var firstUser = _fixture.BitwardenInstanceRepository.InstancesWithCredentials.First();
-        var result = await _applicationController.SignIn(firstUser.Username, firstUser.Password, firstUser.Totp, CancellationToken.None);
+        var result = await _applicationController.SignIn(firstUser.Username, firstUser.Password, firstUser.Totp,
+            CancellationToken.None);
         Assert.Equal(SignInResult.AlreadySignedIn, result);
         var accounts = _applicationController.GetAccounts();
         Assert.Equal([new AccountListModel(firstUser.Key.Id, firstUser.Username)], accounts);
@@ -71,29 +73,37 @@ public class SigningInTests
     {
         await _applicationController.Initialize();
         var firstUser = _fixture.BitwardenInstanceRepository.InstancesWithCredentials.First();
-        var firstUserResult = await _applicationController.SignIn(firstUser.Username, firstUser.Password, firstUser.Totp, CancellationToken.None);
+        var firstUserResult = await _applicationController.SignIn(firstUser.Username, firstUser.Password,
+            firstUser.Totp, CancellationToken.None);
         Assert.Equal(SignInResult.Success, firstUserResult);
-        
+
         var secondUser = _fixture.BitwardenInstanceRepository.InstancesWithCredentials.Skip(1).First();
-        var secondUserResult = await _applicationController.SignIn(secondUser.Username, secondUser.Password, secondUser.Totp, CancellationToken.None);
+        var secondUserResult = await _applicationController.SignIn(secondUser.Username, secondUser.Password,
+            secondUser.Totp, CancellationToken.None);
         Assert.Equal(SignInResult.Success, secondUserResult);
-        
+
         var accounts = _applicationController.GetAccounts();
-        Assert.Equal([new AccountListModel(firstUser.Key.Id, firstUser.Username), new AccountListModel(secondUser.Key.Id, secondUser.Username)], accounts);
+        Assert.Equal(
+        [
+            new AccountListModel(firstUser.Key.Id, firstUser.Username),
+            new AccountListModel(secondUser.Key.Id, secondUser.Username)
+        ], accounts);
     }
-    
+
     [Fact]
     public async Task WrongCredentialsWithDifferentAccount()
     {
         await _applicationController.Initialize();
         var firstUser = _fixture.BitwardenInstanceRepository.InstancesWithCredentials.First();
-        var firstUserResult = await _applicationController.SignIn(firstUser.Username, firstUser.Password, firstUser.Totp, CancellationToken.None);
+        var firstUserResult = await _applicationController.SignIn(firstUser.Username, firstUser.Password,
+            firstUser.Totp, CancellationToken.None);
         Assert.Equal(SignInResult.Success, firstUserResult);
-        
+
         var secondUser = _fixture.BitwardenInstanceRepository.InstancesWithCredentials.Skip(1).First();
-        var secondUserResult = await _applicationController.SignIn(secondUser.Username, "wrong", secondUser.Totp, CancellationToken.None);
+        var secondUserResult =
+            await _applicationController.SignIn(secondUser.Username, "wrong", secondUser.Totp, CancellationToken.None);
         Assert.Equal(SignInResult.WrongCredentials, secondUserResult);
-        
+
         var accounts = _applicationController.GetAccounts();
         Assert.Equal([new AccountListModel(firstUser.Key.Id, firstUser.Username)], accounts);
     }
@@ -102,10 +112,11 @@ public class SigningInTests
     public async Task NotInitialized()
     {
         var firstUser = _fixture.BitwardenInstanceRepository.InstancesWithCredentials.First();
-        await Assert.ThrowsAsync<ApplicationNotInitializedException>(() => _applicationController.SignIn(firstUser.Username,
-                                                            firstUser.Password,
-                                                            firstUser.Totp,
-                                                               CancellationToken.None));
+        await Assert.ThrowsAsync<ApplicationNotInitializedException>(() => _applicationController.SignIn(
+            firstUser.Username,
+            firstUser.Password,
+            firstUser.Totp,
+            CancellationToken.None));
     }
 
     [Fact]
@@ -119,30 +130,37 @@ public class SigningInTests
     {
         await _applicationController.Initialize();
         var firstUser = _fixture.BitwardenInstanceRepository.InstancesWithCredentials.First();
-        var firstUserResult = await _applicationController.SignIn(firstUser.Username, firstUser.Password, firstUser.Totp, CancellationToken.None);
+        var firstUserResult = await _applicationController.SignIn(firstUser.Username, firstUser.Password,
+            firstUser.Totp, CancellationToken.None);
         Assert.Equal(SignInResult.Success, firstUserResult);
-        
+
         var secondUser = _fixture.BitwardenInstanceRepository.InstancesWithCredentials.Skip(1).First();
-        var secondUserResult = await _applicationController.SignIn(secondUser.Username, secondUser.Password, secondUser.Totp, CancellationToken.None);
+        var secondUserResult = await _applicationController.SignIn(secondUser.Username, secondUser.Password,
+            secondUser.Totp, CancellationToken.None);
         Assert.Equal(SignInResult.Success, secondUserResult);
 
         _applicationController = _fixture.CreateApplicationController();
         await _applicationController.Initialize();
         var accounts = _applicationController.GetAccounts();
-        Assert.Equal([new AccountListModel(firstUser.Key.Id, firstUser.Username), new AccountListModel(secondUser.Key.Id, secondUser.Username)], accounts);
+        Assert.Equal(
+        [
+            new AccountListModel(firstUser.Key.Id, firstUser.Username),
+            new AccountListModel(secondUser.Key.Id, secondUser.Username)
+        ], accounts);
     }
-    
+
     [Fact]
     public async Task CorruptedConfigurationDiscarded()
     {
         await _applicationController.Initialize();
         var firstUser = _fixture.BitwardenInstanceRepository.InstancesWithCredentials.First();
-        var firstUserResult = await _applicationController.SignIn(firstUser.Username, firstUser.Password, firstUser.Totp, CancellationToken.None);
+        var firstUserResult = await _applicationController.SignIn(firstUser.Username, firstUser.Password,
+            firstUser.Totp, CancellationToken.None);
         Assert.Equal(SignInResult.Success, firstUserResult);
-        
+
         var randomBytes = RandomNumberGenerator.GetBytes(64);
         await _fixture.BinaryConfigurationRepository.Store(randomBytes);
-        
+
         var app2 = _fixture.CreateApplicationController();
         var result = await app2.Initialize();
         Assert.Equal(ApplicationInitializeResult.Success, result);
@@ -155,7 +173,7 @@ public class SigningInTests
     {
         char[] validFirstCharacters = ['{', '['];
         char[] validLastCharacters = ['}', ']'];
-        
+
         await TestCorrectCredentials();
         var bytes = await _fixture.BinaryConfigurationRepository.Get();
         var str = Encoding.UTF8.GetString(bytes);
@@ -163,7 +181,7 @@ public class SigningInTests
         var lastCharacter = str[^1];
         var firstCharIsValid = validFirstCharacters.Contains(firstCharacter);
         var lastCharIsValid = validLastCharacters.Contains(lastCharacter);
-        
+
         Assert.False(firstCharIsValid && lastCharIsValid);
     }
 
@@ -175,7 +193,8 @@ public class SigningInTests
         _fixture.BitwardenInstanceRepository.EnableLongDelay = true;
         var tokenSource = new CancellationTokenSource();
         await tokenSource.CancelAsync();
-        var result = await _applicationController.SignIn(firstUser.Username, firstUser.Password, firstUser.Totp, tokenSource.Token);
+        var result = await _applicationController.SignIn(firstUser.Username, firstUser.Password, firstUser.Totp,
+            tokenSource.Token);
         Assert.Equal(SignInResult.Timeout, result);
     }
 
@@ -183,7 +202,8 @@ public class SigningInTests
     {
         await _applicationController.Initialize();
         var firstUser = _fixture.BitwardenInstanceRepository.InstancesWithCredentials.First();
-        var result = await _applicationController.SignIn(firstUser.Username, firstUser.Password, firstUser.Totp, CancellationToken.None);
+        var result = await _applicationController.SignIn(firstUser.Username, firstUser.Password, firstUser.Totp,
+            CancellationToken.None);
         Assert.Equal(SignInResult.Success, result);
     }
 
@@ -194,18 +214,18 @@ public class SigningInTests
         var username = replaceUser ?? firstUser.Username;
         var password = replacePassword ?? firstUser.Password;
         var totp = replaceTotp ?? firstUser.Totp;
-        
+
         var result = await _applicationController.SignIn(username, password, totp, CancellationToken.None);
         Assert.Equal(SignInResult.WrongCredentials, result);
 
         var searchEntries = _applicationController.Search("Entry");
         Assert.Empty(searchEntries);
     }
-    
+
     // Search returns password list with entries
     // Sign in with second account should append entries to password list
     // Restarting application returns password list with entries
-    
+
     // BW_NOINTERACTION="true" bw login --raw username password
     // BW_NOINTERACTION="true" bw login --raw username password --method 0 --code totpcode
     // If 2 factor is required: "Login failed. No provider selected."

@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using KeySharp;
 using Quickwarden.Application.PlugIns;
 
@@ -39,7 +40,7 @@ public class MultiPlatformSecretRepository : ISecretRepository
     private static string GenerateSecret()
     {
         var bytes = new byte[32];
-        using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+        using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(bytes);
         return Convert.ToHexString(bytes);
     }

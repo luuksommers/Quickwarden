@@ -19,7 +19,8 @@ public class TotpTests
     {
         const string expectedKey = "113139";
         var totp = new TotpGenerator(new StaticClockFake());
-        var key = totp.GenerateFromSecret("otpauth://totp/Someplace:someaccount?secret=2KSSJX2XNU2UK3N5RA5JHLGKXCELCY7N&issuer=Someplace");
+        var key = totp.GenerateFromSecret(
+            "otpauth://totp/Someplace:someaccount?secret=2KSSJX2XNU2UK3N5RA5JHLGKXCELCY7N&issuer=Someplace");
         Assert.Equal(expectedKey, key.Code);
     }
 }

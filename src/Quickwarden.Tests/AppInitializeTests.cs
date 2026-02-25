@@ -20,7 +20,7 @@ public class AppInitializeTests
         await _applicationController.Initialize();
         Assert.True(_fixture.QuickwardenEnvironment.Initialized);
     }
-    
+
     [Fact]
     public async Task ChecksBitwardenCliInstaled()
     {
@@ -74,13 +74,13 @@ public class AppInitializeTests
         var result = await app2.Initialize();
         Assert.Equal(ApplicationInitializeResult.Success, result);
     }
-    
+
     [Fact]
     public async Task InitializeTwice()
     {
         await _applicationController.Initialize();
         await Assert.ThrowsAsync<ApplicationAlreadyInitializedException>(() => _applicationController
-                                                                             .Initialize());
+            .Initialize());
     }
 
     // Created accounts are saved

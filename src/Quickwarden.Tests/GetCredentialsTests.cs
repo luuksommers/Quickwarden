@@ -13,17 +13,29 @@ public class GetCredentialsTests : IAsyncLifetime
     {
         _applicationController = _fixture.CreateApplicationController();
     }
-    
+
+    public async Task InitializeAsync()
+    {
+        await _applicationController.Initialize();
+    }
+
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
+    }
+
     [Fact]
     public async Task NotInitialized()
     {
         _applicationController = _fixture.CreateApplicationController();
-        await Assert.ThrowsAsync<ApplicationNotInitializedException>(() => _applicationController.GetPassword("234978"));
-        await Assert.ThrowsAsync<ApplicationNotInitializedException>(() => _applicationController.GetUsername("234978"));
+        await Assert.ThrowsAsync<ApplicationNotInitializedException>(() =>
+            _applicationController.GetPassword("234978"));
+        await Assert.ThrowsAsync<ApplicationNotInitializedException>(() =>
+            _applicationController.GetUsername("234978"));
         await Assert.ThrowsAsync<ApplicationNotInitializedException>(() => _applicationController.GetTotp("234978"));
         await Assert.ThrowsAsync<ApplicationNotInitializedException>(() => _applicationController.GetNotes("234978"));
     }
-    
+
     [Fact]
     public async Task NotFound()
     {
@@ -33,7 +45,7 @@ public class GetCredentialsTests : IAsyncLifetime
         await Assert.ThrowsAsync<KeyNotFoundException>(() => _applicationController.GetTotp("anId"));
         await Assert.ThrowsAsync<KeyNotFoundException>(() => _applicationController.GetNotes("anId"));
     }
-    
+
     [Fact]
     public async Task ReturnsPassword()
     {
@@ -55,53 +67,43 @@ public class GetCredentialsTests : IAsyncLifetime
         await SignInAccount2();
         await Assert.ThrowsAsync<TotpNotFoundException>(() => _applicationController.GetTotp("23847837"));
     }
-    
+
     [Fact]
     public async Task UsernameNotFound()
     {
         await SignInAccount1();
         await Assert.ThrowsAsync<UsernameNotFoundException>(() => _applicationController.GetUsername("348948"));
     }
-    
+
     [Fact]
     public async Task PasswordNotFound()
     {
         await SignInAccount1();
         await Assert.ThrowsAsync<PasswordNotFoundException>(() => _applicationController.GetPassword("483938"));
     }
-    
+
     [Fact]
     public async Task NotesNotFound()
     {
         await SignInAccount1();
         await Assert.ThrowsAsync<NotesNotFoundException>(() => _applicationController.GetNotes("483938"));
     }
-    
-    public async Task InitializeAsync()
-    {
-        await _applicationController.Initialize();
-    }
-    
-    public Task DisposeAsync()
-    {
-        return Task.CompletedTask;
-    }
-    
+
     private async Task SignInAccount1()
     {
         var signInResult = await _applicationController.SignIn("sjoerd",
-                                                               " pass",
-                                                               "237489",
-                                                               CancellationToken.None);
+            " pass",
+            "237489",
+            CancellationToken.None);
         Assert.Equal(SignInResult.Success, signInResult);
     }
-    
+
     private async Task SignInAccount2()
     {
         var signInResult = await _applicationController.SignIn("hannie",
-                                                               "pass2",
-                                                               "473829",
-                                                               CancellationToken.None);
+            "pass2",
+            "473829",
+            CancellationToken.None);
         Assert.Equal(SignInResult.Success, signInResult);
     }
 }

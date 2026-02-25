@@ -1,9 +1,7 @@
 using System;
 using System.Linq;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Controls.Platform;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
@@ -12,10 +10,11 @@ using Quickwarden.UI.ViewModels;
 
 namespace Quickwarden.UI;
 
-public partial class App : Avalonia.Application
+public class App : Avalonia.Application
 {
-    private TrayIcon? _trayIcon;
     private AppViewModel? _appViewModel;
+    private TrayIcon? _trayIcon;
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -31,12 +30,15 @@ public partial class App : Avalonia.Application
             _appViewModel = new AppViewModel();
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             DataContext = _appViewModel;
-            var trayIcon = OperatingSystem.IsMacOS() ? new Uri("avares://Quickwarden.UI/Assets/Icon-trayicon-template-256.png") : new Uri("avares://Quickwarden.UI/Assets/Icon-sm-256.png");
-            _trayIcon = new TrayIcon()
+            var trayIcon = OperatingSystem.IsMacOS()
+                ? new Uri("avares://Quickwarden.UI/Assets/Icon-trayicon-template-256.png")
+                : new Uri("avares://Quickwarden.UI/Assets/Icon-sm-256.png");
+            _trayIcon = new TrayIcon
             {
                 Command = _appViewModel.ShowWindowCommand,
                 Icon = new WindowIcon(new Bitmap(AssetLoader.Open(trayIcon))),
-                Menu = [
+                Menu =
+                [
                     new NativeMenuItem("Show")
                     {
                         Command = _appViewModel.ShowWindowCommand
@@ -49,7 +51,7 @@ public partial class App : Avalonia.Application
             };
             MacOSProperties.SetIsTemplateIcon(_trayIcon, true);
         }
-        
+
         base.OnFrameworkInitializationCompleted();
     }
 
@@ -60,9 +62,6 @@ public partial class App : Avalonia.Application
             BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
 
         // remove each entry found
-        foreach (var plugin in dataValidationPluginsToRemove)
-        {
-            BindingPlugins.DataValidators.Remove(plugin);
-        }
+        foreach (var plugin in dataValidationPluginsToRemove) BindingPlugins.DataValidators.Remove(plugin);
     }
 }

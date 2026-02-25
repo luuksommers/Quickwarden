@@ -14,6 +14,16 @@ public class SearchTests : IAsyncLifetime
         _applicationController = _fixture.CreateApplicationController();
     }
 
+    public async Task InitializeAsync()
+    {
+        await _applicationController.Initialize();
+    }
+
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
+    }
+
     [Fact]
     public async Task NotInitialized()
     {
@@ -27,7 +37,7 @@ public class SearchTests : IAsyncLifetime
         await SignInAccount1();
         var searchResult = _applicationController.Search("No");
         Assert.Equal(2, searchResult.Length);
-        
+
         var entry1 = searchResult.Single(result => result.Name == "NoPass");
         Assert.Equal("NoPass", entry1.Name);
         Assert.Equal("sjoerd@nopass.com", entry1.Username);
@@ -35,7 +45,7 @@ public class SearchTests : IAsyncLifetime
         Assert.False(entry1.HasPassword);
         Assert.True(entry1.HasUsername);
         Assert.False(string.IsNullOrWhiteSpace(entry1.Id));
-        
+
         var entry2 = searchResult.Single(result => result.Name == "NoUser");
         Assert.Equal("NoUser", entry2.Name);
         Assert.Empty(entry2.Username);
@@ -50,7 +60,7 @@ public class SearchTests : IAsyncLifetime
     {
         await SignInAccount1();
         await SignInAccount2();
-        
+
         var searchResult = _applicationController.Search("Entry");
         Assert.Equal(2, searchResult.Count());
 
@@ -61,7 +71,7 @@ public class SearchTests : IAsyncLifetime
         Assert.True(entry1.HasUsername);
         Assert.True(entry1.HasNotes);
         Assert.False(string.IsNullOrWhiteSpace(entry1.Id));
-        
+
         var entry2 = searchResult.Single(item => item.Name == "Vault entry 2");
         Assert.Equal("hannie@entry2site.com", entry2.Username);
         Assert.False(entry2.HasTotp);
@@ -98,21 +108,21 @@ public class SearchTests : IAsyncLifetime
         var searchResults = _applicationController.Search("Something");
         Assert.Empty(searchResults);
     }
-    
+
     [Fact]
     public async Task SearchByName()
     {
         await SignInAccount1();
         await SignInAccount2();
         var searchResults = _applicationController.Search("Vault 1 .com");
-        
+
         var entry1 = searchResults.Single(item => item.Name == "Vault entry 1");
         Assert.Equal("sjoerd@entry1site.com", entry1.Username);
         Assert.True(entry1.HasTotp);
         Assert.True(entry1.HasPassword);
         Assert.False(string.IsNullOrWhiteSpace(entry1.Id));
     }
-    
+
     [Fact]
     public async Task SearchConstraints()
     {
@@ -121,16 +131,16 @@ public class SearchTests : IAsyncLifetime
         var searchResults = _applicationController.Search("Vault 1 yxoe .com");
         Assert.Empty(searchResults);
     }
-    
+
     [Fact]
     public async Task SearchAfterRestart()
     {
         await SignInAccount1();
         await SignInAccount2();
-        
+
         _applicationController = _fixture.CreateApplicationController();
         await _applicationController.Initialize();
-        
+
         var searchResult = _applicationController.Search("Entry");
         Assert.Equal(2, searchResult.Count());
 
@@ -140,7 +150,7 @@ public class SearchTests : IAsyncLifetime
         Assert.True(entry1.HasPassword);
         Assert.True(entry1.HasUsername);
         Assert.False(string.IsNullOrWhiteSpace(entry1.Id));
-        
+
         var entry2 = searchResult.Single(item => item.Name == "Vault entry 2");
         Assert.Equal("hannie@entry2site.com", entry2.Username);
         Assert.False(entry2.HasTotp);
@@ -154,13 +164,13 @@ public class SearchTests : IAsyncLifetime
     {
         await SignInAccount2();
         await SignInAccount1();
-        
+
         _applicationController = _fixture.CreateApplicationController();
         await _applicationController.Initialize();
-        
+
         var searchResult = _applicationController.Search("Entry");
         Assert.Equal(2, searchResult.Count());
-        
+
         Assert.Equal("Vault entry 1", searchResult[0].Name);
         Assert.Equal("Vault entry 2", searchResult[1].Name);
     }
@@ -175,32 +185,22 @@ public class SearchTests : IAsyncLifetime
         var result = searchResult.Single();
         Assert.Equal("23847837", result.Id);
     }
-    
-    public async Task InitializeAsync()
-    {
-        await _applicationController.Initialize();
-    }
-
-    public Task DisposeAsync()
-    {
-        return Task.CompletedTask;
-    }
 
     private async Task SignInAccount1()
     {
         var signInResult = await _applicationController.SignIn("sjoerd",
-                                                               " pass",
-                                                               "237489",
-                                                               CancellationToken.None);
+            " pass",
+            "237489",
+            CancellationToken.None);
         Assert.Equal(SignInResult.Success, signInResult);
     }
 
     private async Task SignInAccount2()
     {
         var signInResult = await _applicationController.SignIn("hannie",
-                                                                "pass2",
-                                                                "473829",
-                                                                CancellationToken.None);
+            "pass2",
+            "473829",
+            CancellationToken.None);
         Assert.Equal(SignInResult.Success, signInResult);
     }
 }

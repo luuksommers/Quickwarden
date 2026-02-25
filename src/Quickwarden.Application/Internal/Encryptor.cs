@@ -16,14 +16,14 @@ internal class Encryptor
         using var ms = new MemoryStream();
         using var aes = Aes.Create();
         aes.Key = _secret;
-        
+
         ms.Write(aes.IV, 0, aes.IV.Length);
         await using (var cryptoStream =
                      new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
         {
             cryptoStream.Write(bytes);
-
         }
+
         return ms.ToArray();
     }
 }

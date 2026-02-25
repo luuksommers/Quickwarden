@@ -14,13 +14,23 @@ public class SigningOutTests : IAsyncLifetime
         _applicationController = _fixture.CreateApplicationController();
     }
 
+    public async Task InitializeAsync()
+    {
+        await _applicationController.Initialize();
+    }
+
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
+    }
+
     [Fact]
     public async Task NotInitialized()
     {
         _applicationController = _fixture.CreateApplicationController();
         await Assert.ThrowsAsync<ApplicationNotInitializedException>(() =>
-                                                                         _applicationController
-                                                                             .SignOut("id1"));
+            _applicationController
+                .SignOut("id1"));
     }
 
     [Fact]
@@ -31,7 +41,7 @@ public class SigningOutTests : IAsyncLifetime
 
         await _applicationController.SignOut("id1");
         Assert.DoesNotContain(_fixture.BitwardenInstanceRepository.BitwardenInstances,
-                              item => item.Instance.Id == "id1");
+            item => item.Instance.Id == "id1");
         var accounts = _applicationController.GetAccounts();
         Assert.Single(accounts);
         Assert.Equal("id2", accounts[0].Id);
@@ -75,31 +85,21 @@ public class SigningOutTests : IAsyncLifetime
         await Assert.ThrowsAsync<KeyNotFoundException>(() => _applicationController.SignOut("Hey"));
     }
 
-    public async Task InitializeAsync()
-    {
-        await _applicationController.Initialize();
-    }
-
-    public Task DisposeAsync()
-    {
-        return Task.CompletedTask;
-    }
-
     private async Task SignInAccount1()
     {
         var signInResult = await _applicationController.SignIn("sjoerd",
-                                                               " pass",
-                                                               "237489",
-                                                               CancellationToken.None);
+            " pass",
+            "237489",
+            CancellationToken.None);
         Assert.Equal(SignInResult.Success, signInResult);
     }
 
     private async Task SignInAccount2()
     {
         var signInResult = await _applicationController.SignIn("hannie",
-                                                               "pass2",
-                                                               "473829",
-                                                               CancellationToken.None);
+            "pass2",
+            "473829",
+            CancellationToken.None);
         Assert.Equal(SignInResult.Success, signInResult);
     }
 }

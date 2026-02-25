@@ -9,9 +9,9 @@ public class BitwardenInstanceRepositoryFake : IBitwardenInstanceRepository
     public List<InstanceWithCredentials> BitwardenInstances { get; } = [];
 
     public async Task<BitwardenInstanceCreateResult> Create(string username,
-                                                            string password,
-                                                            string totp,
-                                                            CancellationToken cancellationToken)
+        string password,
+        string totp,
+        CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             throw new InvalidOperationException();
@@ -24,26 +24,26 @@ public class BitwardenInstanceRepositoryFake : IBitwardenInstanceRepository
         }
 
         var instance = InstancesWithCredentials.SingleOrDefault(instance =>
-                                                                    instance.Username == username
-                                                                    && instance.Password == password);
+            instance.Username == username
+            && instance.Password == password);
         if (instance == null)
-            return new(BitwardenInstanceCreateResultType.WrongCredentials, null);
+            return new BitwardenInstanceCreateResult(BitwardenInstanceCreateResultType.WrongCredentials, null);
 
         if (totp == string.Empty)
-            return new(BitwardenInstanceCreateResultType.Missing2Fa, null);
+            return new BitwardenInstanceCreateResult(BitwardenInstanceCreateResultType.Missing2Fa, null);
         if (totp != instance.Totp)
-            return new(BitwardenInstanceCreateResultType.WrongCredentials, null);
+            return new BitwardenInstanceCreateResult(BitwardenInstanceCreateResultType.WrongCredentials, null);
 
         BitwardenInstances.Add(instance);
-        return new(BitwardenInstanceCreateResultType.Success, instance.Key);
+        return new BitwardenInstanceCreateResult(BitwardenInstanceCreateResultType.Success, instance.Key);
     }
 
     public Task<IBitwardenInstance[]> Get(BitwardenInstanceKey[] keys)
     {
         return Task.FromResult(BitwardenInstances
-                               .Where(instance => keys.Contains(instance.Key))
-                               .Select(instance => instance.Instance)
-                               .ToArray());
+            .Where(instance => keys.Contains(instance.Key))
+            .Select(instance => instance.Instance)
+            .ToArray());
     }
 
     public Task Delete(BitwardenInstanceKey key)

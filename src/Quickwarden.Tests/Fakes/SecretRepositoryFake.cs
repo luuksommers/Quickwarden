@@ -4,8 +4,8 @@ namespace Quickwarden.Tests.Fakes;
 
 public class SecretRepositoryFake : ISecretRepository
 {
-    public bool CanGet { get; set; } = true;
     private readonly string? _secret = GenerateSecret();
+    public bool CanGet { get; set; } = true;
 
     public Task<string?> Get()
     {
@@ -18,10 +18,7 @@ public class SecretRepositoryFake : ISecretRepository
     private static string GenerateSecret()
     {
         var bytes = new byte[32];
-        for (var i = 0; i < 32; i++)
-        {
-            bytes[i] = 0xff;
-        }
+        for (var i = 0; i < 32; i++) bytes[i] = 0xff;
         return Convert.ToHexString(bytes);
     }
 }

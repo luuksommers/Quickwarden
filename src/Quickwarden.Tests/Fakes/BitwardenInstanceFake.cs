@@ -4,9 +4,9 @@ namespace Quickwarden.Tests.Fakes;
 
 internal class BitwardenInstanceFake : IBitwardenInstance
 {
+    public List<BitwardenVaultItem> VaultItems { get; set; } = [];
     public string Id { get; set; }
     public string Username { get; set; }
-    public List<BitwardenVaultItem> VaultItems { get; set; } = [];
 
     public Task<BitwardenVaultItem[]> GetVaultItems(CancellationToken cancellationToken)
     {

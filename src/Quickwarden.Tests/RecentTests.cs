@@ -10,16 +10,9 @@ public class RecentTests
     {
         Username,
         Password,
-        Totp,
+        Totp
     }
 
-    private Dictionary<Credentials, Action<string>> GetCredentialsFns => new()
-    {
-        [Credentials.Username] = (id) => { _applicationController.GetUsername(id); },
-        [Credentials.Password] = (id) => { _applicationController.GetPassword(id); },
-        [Credentials.Totp] = (id) => { _applicationController.GetTotp(id); }
-    };
-    
     private readonly ApplicationFixture _fixture = new();
     private ApplicationController _applicationController;
 
@@ -27,6 +20,13 @@ public class RecentTests
     {
         _applicationController = _fixture.CreateApplicationController();
     }
+
+    private Dictionary<Credentials, Action<string>> GetCredentialsFns => new()
+    {
+        [Credentials.Username] = id => { _applicationController.GetUsername(id); },
+        [Credentials.Password] = id => { _applicationController.GetPassword(id); },
+        [Credentials.Totp] = id => { _applicationController.GetTotp(id); }
+    };
 
     [Theory]
     [InlineData(Credentials.Username)]
@@ -47,7 +47,7 @@ public class RecentTests
         Assert.Equal("23847837", search3[0].Id);
         Assert.Equal("234978", search3[1].Id);
     }
-    
+
     [Theory]
     [InlineData(Credentials.Username)]
     [InlineData(Credentials.Password)]
@@ -124,7 +124,7 @@ public class RecentTests
         Assert.Equal("23847837", search[0].Id);
         Assert.Equal("234978", search[1].Id);
     }
-    
+
     [Theory]
     [InlineData(Credentials.Username)]
     [InlineData(Credentials.Password)]
@@ -139,7 +139,7 @@ public class RecentTests
         var search1 = _applicationController.Search(string.Empty);
         Assert.Empty(search1);
     }
-    
+
     [Theory]
     [InlineData(Credentials.Username)]
     [InlineData(Credentials.Password)]
@@ -151,7 +151,7 @@ public class RecentTests
         await SignInAccount2();
         GetCredentialsFns[credential]("234978");
         var instance = _fixture.BitwardenInstanceRepository.BitwardenInstances
-                               .Single(instance => instance.Key.Id == "id1");
+            .Single(instance => instance.Key.Id == "id1");
         ((BitwardenInstanceFake)instance.Instance).VaultItems.RemoveAll(item => item.Id == "234978");
         _applicationController = _fixture.CreateApplicationController();
         await _applicationController.Initialize();
@@ -162,18 +162,18 @@ public class RecentTests
     private async Task SignInAccount1()
     {
         var signInResult = await _applicationController.SignIn("sjoerd",
-                                                               " pass",
-                                                               "237489",
-                                                               CancellationToken.None);
+            " pass",
+            "237489",
+            CancellationToken.None);
         Assert.Equal(SignInResult.Success, signInResult);
     }
 
     private async Task SignInAccount2()
     {
         var signInResult = await _applicationController.SignIn("hannie",
-                                                               "pass2",
-                                                               "473829",
-                                                               CancellationToken.None);
+            "pass2",
+            "473829",
+            CancellationToken.None);
         Assert.Equal(SignInResult.Success, signInResult);
     }
 }

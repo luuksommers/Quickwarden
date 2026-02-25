@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
 using Quickwarden.Application.Exceptions;
@@ -14,22 +13,22 @@ namespace Quickwarden.Application;
 public class ApplicationController
 {
     private const int ConfigurationVersion = 0;
-    private readonly ISecretRepository _secretRepository;
-    private readonly IQuickwardenEnvironment _environment;
-    private readonly IBitwardenInstanceRepository _bitwardenInstanceRepository;
+    private readonly List<Account> _accounts = [];
     private readonly IBinaryConfigurationRepository _binaryConfigurationRepository;
+    private readonly IBitwardenInstanceRepository _bitwardenInstanceRepository;
+    private readonly IQuickwardenEnvironment _environment;
+    private readonly List<RecentVaultEntry> _recentVaultEntries = new();
+    private readonly ISecretRepository _secretRepository;
     private readonly ITotpGenerator _totpGenerator;
     private readonly List<BitwardenVaultItem> _vaultItems = new();
-    private readonly List<RecentVaultEntry> _recentVaultEntries = new();
-    private readonly List<Account> _accounts = [];
-    private byte[] _secret = [];
     private bool _initialized;
+    private byte[] _secret = [];
 
     public ApplicationController(ISecretRepository secretRepository,
-                                 IBitwardenInstanceRepository bitwardenInstanceRepository,
-                                 IBinaryConfigurationRepository binaryConfigurationRepository,
-                                 ITotpGenerator totpGenerator,
-                                 IQuickwardenEnvironment environment)
+        IBitwardenInstanceRepository bitwardenInstanceRepository,
+        IBinaryConfigurationRepository binaryConfigurationRepository,
+        ITotpGenerator totpGenerator,
+        IQuickwardenEnvironment environment)
     {
         _secretRepository = secretRepository;
         _bitwardenInstanceRepository = bitwardenInstanceRepository;
@@ -63,9 +62,9 @@ public class ApplicationController
     }
 
     public async Task<SignInResult> SignIn(string username,
-                                           string password,
-                                           string totp,
-                                           CancellationToken cancellationToken)
+        string password,
+        string totp,
+        CancellationToken cancellationToken)
     {
         if (!_initialized)
             throw new ApplicationNotInitializedException();
@@ -74,20 +73,20 @@ public class ApplicationController
         try
         {
             var result = await _bitwardenInstanceRepository.Create(username,
-                                                                   password,
-                                                                   totp,
-                                                                   cancellationToken);
+                password,
+                totp,
+                cancellationToken);
             if (result.ResultType == BitwardenInstanceCreateResultType.WrongCredentials)
                 return SignInResult.WrongCredentials;
             if (result.ResultType == BitwardenInstanceCreateResultType.Missing2Fa)
                 return SignInResult.Missing2Fa;
             if (_accounts.Any(account => account.Username == username))
                 return SignInResult.AlreadySignedIn;
-            var account = new Account()
+            var account = new Account
             {
                 Id = result.Key!.Id,
                 Username = username,
-                Secret = result.Key.Secret,
+                Secret = result.Key.Secret
             };
             _accounts.Add(account);
 
@@ -111,8 +110,8 @@ public class ApplicationController
         if (account == null)
             throw new KeyNotFoundException();
         var vaultItemIds = _vaultItems
-                           .Where(item => item.VaultId == id)
-                           .Select(item => item.Id);
+            .Where(item => item.VaultId == id)
+            .Select(item => item.Id);
         _recentVaultEntries.RemoveAll(item => vaultItemIds.Contains(item.Id));
         _vaultItems.RemoveAll(item => item.VaultId == account.Id);
         var key = new BitwardenInstanceKey(account.Id, account.Username, account.Secret);
@@ -175,8 +174,8 @@ public class ApplicationController
         await LoadConfiguration(listBytesEncrypted);
 
         var accountKeys = _accounts
-                          .Select(x => new BitwardenInstanceKey(x.Id, x.Username, x.Secret))
-                          .ToArray();
+            .Select(x => new BitwardenInstanceKey(x.Id, x.Username, x.Secret))
+            .ToArray();
         var instances = await _bitwardenInstanceRepository.Get(accountKeys);
         await LoadVaults(instances, CancellationToken.None);
 
@@ -192,8 +191,8 @@ public class ApplicationController
             var decrypted = await decryptor.Decrypt(listBytesEncrypted);
             var configurationDeserialized =
                 JsonSerializer.Deserialize<Configuration>(decrypted,
-                                                          ApplicationJsonSerializerContext.Default
-                                                              .Configuration);
+                    ApplicationJsonSerializerContext.Default
+                        .Configuration);
             var accounts = configurationDeserialized?.Accounts ?? [];
             var recentVaultEntries = configurationDeserialized?.RecentVaultEntries ?? [];
             _accounts.AddRange(accounts);
@@ -206,11 +205,11 @@ public class ApplicationController
 
     private async Task StoreConfiguration()
     {
-        var configuration = new Configuration()
+        var configuration = new Configuration
         {
             Version = ConfigurationVersion,
             Accounts = _accounts.ToArray(),
-            RecentVaultEntries = _recentVaultEntries.ToArray(),
+            RecentVaultEntries = _recentVaultEntries.ToArray()
         };
         var serialized =
             JsonSerializer.Serialize(configuration, ApplicationJsonSerializerContext.Default.Configuration);
@@ -233,7 +232,7 @@ public class ApplicationController
         _vaultItems.RemoveAll(item => vaultIds.Contains(item.VaultId));
         _vaultItems.AddRange(allItems);
         _vaultItems.Sort((a, b) =>
-                             string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+            string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
         var itemIds = _vaultItems.Select(x => x.Id).ToArray();
         _recentVaultEntries.RemoveAll(item => !itemIds.Contains(item.Id));
     }
@@ -248,9 +247,9 @@ public class ApplicationController
         var recentEntry = _recentVaultEntries.SingleOrDefault(x => x.Id == item.Id);
         if (recentEntry != null)
             _recentVaultEntries.Remove(recentEntry);
-        var recentVaultEntry = new RecentVaultEntry()
+        var recentVaultEntry = new RecentVaultEntry
         {
-            Id = id,
+            Id = id
         };
         _recentVaultEntries.Insert(0, recentVaultEntry);
         await StoreConfiguration();
@@ -264,34 +263,34 @@ public class ApplicationController
         var searchTerms = query.Split(' ');
         return results
             .Where(item => searchTerms.All(term =>
-                                               item.Name.Contains(term,
-                                                                  StringComparison
-                                                                      .InvariantCultureIgnoreCase)
-                                               || item.Username?.Contains(term,
-                                                        StringComparison.InvariantCultureIgnoreCase)
-                                               == true));
+                item.Name.Contains(term,
+                    StringComparison
+                        .InvariantCultureIgnoreCase)
+                || item.Username?.Contains(term,
+                    StringComparison.InvariantCultureIgnoreCase)
+                == true));
     }
 
     private static SearchResultItem[] ToSearchResultItems(IEnumerable<BitwardenVaultItem> instances)
     {
         return instances
-               .Select(item => new SearchResultItem()
-               {
-                   Id = item.Id,
-                   Name = item.Name,
-                   Username = item.Username ?? string.Empty,
-                   HasTotp = !string.IsNullOrWhiteSpace(item.Totp),
-                   HasPassword = !string.IsNullOrWhiteSpace(item.Password),
-                   HasUsername = !string.IsNullOrWhiteSpace(item.Username),
-                   HasNotes = !string.IsNullOrWhiteSpace(item.Notes),
-               }).ToArray();
+            .Select(item => new SearchResultItem
+            {
+                Id = item.Id,
+                Name = item.Name,
+                Username = item.Username ?? string.Empty,
+                HasTotp = !string.IsNullOrWhiteSpace(item.Totp),
+                HasPassword = !string.IsNullOrWhiteSpace(item.Password),
+                HasUsername = !string.IsNullOrWhiteSpace(item.Username),
+                HasNotes = !string.IsNullOrWhiteSpace(item.Notes)
+            }).ToArray();
     }
 
     public async Task Sync()
     {
         var keys = _accounts
-                   .Select(account => new BitwardenInstanceKey(account.Id, account.Username, account.Secret))
-                   .ToArray();
+            .Select(account => new BitwardenInstanceKey(account.Id, account.Username, account.Secret))
+            .ToArray();
         var repos = await _bitwardenInstanceRepository.Get(keys);
         await LoadVaults(repos, CancellationToken.None);
         await StoreConfiguration();

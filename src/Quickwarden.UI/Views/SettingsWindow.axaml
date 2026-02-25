@@ -1,6 +1,5 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:Quickwarden.UI.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:Quickwarden.UI.ViewModels"
@@ -26,11 +25,17 @@
     <ScrollViewer>
         <StackPanel Spacing="8" Margin="16">
             <TextBlock FontSize="24">Accounts</TextBlock>
-            <ListBox IsEnabled="{Binding !IsLoading}" SelectedItem="{Binding SelectedAccount}" ItemsSource="{Binding Accounts}">
-            </ListBox>
+            <ListBox IsEnabled="{Binding !IsLoading}" SelectedItem="{Binding SelectedAccount}"
+                     ItemsSource="{Binding Accounts}" />
             <StackPanel Spacing="8" Orientation="Horizontal">
-                <Button Command="{Binding ShowSignInWindowCommand}" IsEnabled="{Binding !IsLoading}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">Add...</Button>
-                <Button Command="{Binding RemoveAccountCommand}" IsEnabled="{Binding RemoveButtonEnabled}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">Remove</Button>
+                <Button Command="{Binding ShowSignInWindowCommand}" IsEnabled="{Binding !IsLoading}"
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                    Add...
+                </Button>
+                <Button Command="{Binding RemoveAccountCommand}" IsEnabled="{Binding RemoveButtonEnabled}"
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                    Remove
+                </Button>
             </StackPanel>
         </StackPanel>
     </ScrollViewer>

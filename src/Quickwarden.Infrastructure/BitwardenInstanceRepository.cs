@@ -6,9 +6,9 @@ namespace Quickwarden.Infrastructure;
 public class BitwardenInstanceRepository : IBitwardenInstanceRepository
 {
     public async Task<BitwardenInstanceCreateResult> Create(string username,
-                                                            string password,
-                                                            string totp,
-                                                            CancellationToken cancellationToken)
+        string password,
+        string totp,
+        CancellationToken cancellationToken)
     {
         var id = Guid.NewGuid().ToString();
         var vaultPath = Path.Join(QuickwardenEnvironment.VaultsPath, id);
@@ -16,7 +16,7 @@ public class BitwardenInstanceRepository : IBitwardenInstanceRepository
 
         try
         {
-            var env = new Dictionary<string, string>()
+            var env = new Dictionary<string, string>
             {
                 ["BITWARDENCLI_APPDATA_DIR"] = vaultPath,
                 ["BW_NOINTERACTION"] = "true"
@@ -38,39 +38,6 @@ public class BitwardenInstanceRepository : IBitwardenInstanceRepository
         }
     }
 
-    private BitwardenInstanceCreateResult GetCreateResult(string id,
-                                                          string username,
-                                                          ShellExecuteResult loginResult)
-    {
-        if (loginResult.StdOutLines.Length == 1)
-        {
-            var secret = loginResult.StdOutLines[0];
-            return new BitwardenInstanceCreateResult(BitwardenInstanceCreateResultType.Success,
-                                                     new BitwardenInstanceKey(id, username, secret));
-        }
-
-        if (loginResult.StdErrLines.Contains("Email address is invalid.")
-            || loginResult.StdErrLines.Contains("Username or password is incorrect. Try again.")
-            || loginResult.StdErrLines.Contains("Two-step token is invalid. Try again."))
-            return new BitwardenInstanceCreateResult(BitwardenInstanceCreateResultType.WrongCredentials,
-                                                     null);
-
-        if (loginResult.StdErrLines.Contains("Login failed. No provider selected.")
-            || loginResult.StdErrLines.Contains("Code is required."))
-            return new BitwardenInstanceCreateResult(BitwardenInstanceCreateResultType.Missing2Fa,
-                                                     null);
-
-        throw new BitwardenCliError(loginResult.StdErrLines, loginResult.StdOutLines);
-    }
-
-    private string[] GetArgs(string username, string password, string totp)
-    {
-        if (string.IsNullOrWhiteSpace(totp))
-            return ["login", "--raw", username, password];
-
-        return ["login", "--raw", username, password, "--method", "0", "--code", totp];
-    }
-
     public Task<IBitwardenInstance[]> Get(BitwardenInstanceKey[] keys)
     {
         List<IBitwardenInstance> instances = [];
@@ -88,16 +55,49 @@ public class BitwardenInstanceRepository : IBitwardenInstanceRepository
     public async Task Delete(BitwardenInstanceKey key)
     {
         var vaultDirectory = Path.Join(QuickwardenEnvironment.VaultsPath, key.Id);
-        var env = new Dictionary<string, string>()
+        var env = new Dictionary<string, string>
         {
             ["BITWARDENCLI_APPDATA_DIR"] = vaultDirectory,
             ["BW_NOINTERACTION"] = "true",
-            ["BW_SESSION"] = key.Secret,
+            ["BW_SESSION"] = key.Secret
         };
         var cmd = "bw";
         string[] args = ["logout"];
         await ShellExecutor.ExecuteAsync(cmd, args, env);
         Directory.Delete(vaultDirectory, true);
+    }
+
+    private BitwardenInstanceCreateResult GetCreateResult(string id,
+        string username,
+        ShellExecuteResult loginResult)
+    {
+        if (loginResult.StdOutLines.Length == 1)
+        {
+            var secret = loginResult.StdOutLines[0];
+            return new BitwardenInstanceCreateResult(BitwardenInstanceCreateResultType.Success,
+                new BitwardenInstanceKey(id, username, secret));
+        }
+
+        if (loginResult.StdErrLines.Contains("Email address is invalid.")
+            || loginResult.StdErrLines.Contains("Username or password is incorrect. Try again.")
+            || loginResult.StdErrLines.Contains("Two-step token is invalid. Try again."))
+            return new BitwardenInstanceCreateResult(BitwardenInstanceCreateResultType.WrongCredentials,
+                null);
+
+        if (loginResult.StdErrLines.Contains("Login failed. No provider selected.")
+            || loginResult.StdErrLines.Contains("Code is required."))
+            return new BitwardenInstanceCreateResult(BitwardenInstanceCreateResultType.Missing2Fa,
+                null);
+
+        throw new BitwardenCliError(loginResult.StdErrLines, loginResult.StdOutLines);
+    }
+
+    private string[] GetArgs(string username, string password, string totp)
+    {
+        if (string.IsNullOrWhiteSpace(totp))
+            return ["login", "--raw", username, password];
+
+        return ["login", "--raw", username, password, "--method", "0", "--code", totp];
     }
 }
 
@@ -106,9 +106,9 @@ internal class BitwardenCliError : Exception
     public BitwardenCliError(string[] stdErrLines, string[] stdOutLines)
         : base("Bitwarden CLI returned an unexpected error:\r\n"
                + string.Join("\r\n", stdErrLines)
-               + ((stdOutLines.Length > 0 && !string.IsNullOrWhiteSpace(stdOutLines[0])
-                       ? "\r\n\r\nConsole output:\r\n" + string.Join("\r\n", stdOutLines)
-                       : string.Empty)))
+               + (stdOutLines.Length > 0 && !string.IsNullOrWhiteSpace(stdOutLines[0])
+                   ? "\r\n\r\nConsole output:\r\n" + string.Join("\r\n", stdOutLines)
+                   : string.Empty))
     {
     }
 }

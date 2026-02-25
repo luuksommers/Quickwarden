@@ -4,9 +4,10 @@ using Avalonia;
 
 namespace Quickwarden.UI;
 
-sealed class Program
+internal sealed class Program
 {
-    private static Mutex mutex = new Mutex(true, "quickwarden-924e10d2-a114-42ca-bb1d-1996cc0c72a7");
+    private static readonly Mutex mutex = new(true, "quickwarden-924e10d2-a114-42ca-bb1d-1996cc0c72a7");
+
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
@@ -21,12 +22,14 @@ sealed class Program
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
+    {
+        return AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace()
-            .With(new MacOSPlatformOptions()
+            .With(new MacOSPlatformOptions
             {
                 ShowInDock = false
             });
+    }
 }

@@ -6,5 +6,5 @@ public enum SignInResult
     WrongCredentials,
     Success,
     Timeout,
-    Missing2Fa,
+    Missing2Fa
 }

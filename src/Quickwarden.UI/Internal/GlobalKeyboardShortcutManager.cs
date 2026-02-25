@@ -2,7 +2,7 @@ using System;
 using Avalonia.Threading;
 using Microsoft.Win32;
 using SharpHook;
-using SharpHook.Native;
+using SharpHook.Data;
 
 namespace Quickwarden.UI.Internal;
 
@@ -10,12 +10,12 @@ internal class GlobalKeyboardShortcutManager : IDisposable
 {
     private readonly Action _callback;
     private readonly SimpleGlobalHook _hook;
+    private bool _altDown;
+    private bool _cmdDown;
 
     private bool _ctrlDown;
-    private bool _altDown;
-    private bool _shiftDown;
-    private bool _cmdDown;
     private bool _pDown;
+    private bool _shiftDown;
 
     public GlobalKeyboardShortcutManager(Action callback)
     {
@@ -27,33 +27,27 @@ internal class GlobalKeyboardShortcutManager : IDisposable
         _hook.KeyReleased += OnHookOnKeyReleased;
     }
 
+    public void Dispose()
+    {
+        _hook.Dispose();
+    }
+
     private void Reset()
     {
         _ctrlDown = _altDown = _shiftDown = _cmdDown = _pDown = false;
     }
 
-    void OnHookOnKeyPressed(object? sender, KeyboardHookEventArgs args)
+    private void OnHookOnKeyPressed(object? sender, KeyboardHookEventArgs args)
     {
         if (args.Data.KeyCode is KeyCode.VcLeftControl or KeyCode.VcRightControl)
-        {
             _ctrlDown = true;
-        }
         else if (args.Data.KeyCode is KeyCode.VcLeftAlt or KeyCode.VcRightAlt)
-        {
             _altDown = true;
-        }
         else if (args.Data.KeyCode is KeyCode.VcLeftShift or KeyCode.VcRightShift)
-        {
             _shiftDown = true;
-        }
         else if (args.Data.KeyCode is KeyCode.VcLeftMeta or KeyCode.VcRightMeta)
-        {
             _cmdDown = true;
-        }
-        else if (args.Data.KeyCode == KeyCode.VcP)
-        {
-            _pDown = true;
-        }
+        else if (args.Data.KeyCode == KeyCode.VcP) _pDown = true;
 
         if (CombinationPressed())
         {
@@ -66,33 +60,19 @@ internal class GlobalKeyboardShortcutManager : IDisposable
     private void OnHookOnKeyReleased(object? sender, KeyboardHookEventArgs args)
     {
         if (args.Data.KeyCode is KeyCode.VcLeftControl or KeyCode.VcRightControl)
-        {
             _ctrlDown = false;
-        }
         else if (args.Data.KeyCode is KeyCode.VcLeftAlt or KeyCode.VcRightAlt)
-        {
             _altDown = false;
-        }
         else if (args.Data.KeyCode is KeyCode.VcLeftShift or KeyCode.VcRightShift)
-        {
             _shiftDown = false;
-        }
         else if (args.Data.KeyCode is KeyCode.VcLeftMeta or KeyCode.VcRightMeta)
-        {
             _cmdDown = false;
-        }
-        else if (args.Data.KeyCode == KeyCode.VcP)
-        {
-            _pDown = false;
-        }
+        else if (args.Data.KeyCode == KeyCode.VcP) _pDown = false;
     }
 
     public bool CombinationPressed()
     {
-        if (OperatingSystem.IsMacOS())
-        {
-            return _altDown && !_shiftDown && !_ctrlDown && _cmdDown && _pDown;
-        }
+        if (OperatingSystem.IsMacOS()) return _altDown && !_shiftDown && !_ctrlDown && _cmdDown && _pDown;
 
         return _altDown && !_shiftDown && _ctrlDown && !_cmdDown && _pDown;
     }
@@ -100,10 +80,5 @@ internal class GlobalKeyboardShortcutManager : IDisposable
     public void StartListening()
     {
         _hook.RunAsync();
-    }
-
-    public void Dispose()
-    {
-        _hook.Dispose();
     }
 }

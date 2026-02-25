@@ -17,8 +17,8 @@ namespace Quickwarden.UI.ViewModels;
 public partial class AppViewModel : ViewModelBase
 {
     private readonly ApplicationController _application;
-    private readonly MainWindow _mainWindow;
     private readonly GlobalKeyboardShortcutManager _globalKeyboardShortcutManager;
+    private readonly MainWindow _mainWindow;
 
     public AppViewModel()
     {
@@ -29,10 +29,10 @@ public partial class AppViewModel : ViewModelBase
         //                                          new TotpGenerator(fixture.StaticClock),
         //                                          new QuickwardenEnvironmentFake());
         _application = new ApplicationController(SecretRepositoryFactory.Create(),
-                                                 new BitwardenInstanceRepository(),
-                                                 new BinaryConfigurationRepository(),
-                                                 new TotpGenerator(new DefaultClock()),
-                                                 new QuickwardenEnvironment());
+            new BitwardenInstanceRepository(),
+            new BinaryConfigurationRepository(),
+            new TotpGenerator(new DefaultClock()),
+            new QuickwardenEnvironment());
         _globalKeyboardShortcutManager =
             new GlobalKeyboardShortcutManager(ShowWindow);
         _mainWindow = new MainWindow();
@@ -73,7 +73,8 @@ public partial class AppViewModel : ViewModelBase
             if (result == ApplicationInitializeResult.BitwardenCliNotFound)
             {
                 await
-                    FatalMessageBox("Bitwarden CLI was not found.\r\nMake sure it is installed and that its installation directory is included in your PATH environment variable.");
+                    FatalMessageBox(
+                        "Bitwarden CLI was not found.\r\nMake sure it is installed and that its installation directory is included in your PATH environment variable.");
                 return;
             }
 
@@ -88,7 +89,7 @@ public partial class AppViewModel : ViewModelBase
 
             // Initialize viewmodel
             Dispatcher.UIThread.Invoke(() => ((MainWindowViewModel)_mainWindow.DataContext)
-                                           .SetApplicationController(_application));
+                .SetApplicationController(_application));
         }
         catch (Exception ex)
         {

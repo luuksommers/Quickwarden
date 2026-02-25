@@ -22,36 +22,53 @@ public record CredentialListItem : SearchResultItem
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    private ApplicationController? _applicationController;
     private readonly MainWindow _mainWindow;
-    private SettingsWindow? _settingsWindow;
+    private ApplicationController? _applicationController;
     private CredentialListItem[] _credentials = [];
-    private CredentialListItem? _selectedCredential;
-    private string _searchBoxQuery = string.Empty;
     private bool _isSyncing;
+    private string _searchBoxQuery = string.Empty;
+    private CredentialListItem? _selectedCredential;
+    private SettingsWindow? _settingsWindow;
+
+    public MainWindowViewModel(MainWindow mainWindow)
+    {
+        _mainWindow = mainWindow;
+    }
+
     public KeyGesture SettingsShortcutGesture => OperatingSystem.IsMacOS()
-                                                     ? new KeyGesture(Key.S, KeyModifiers.Meta)
-                                                     : new KeyGesture(Key.S, KeyModifiers.Control);
+        ? new KeyGesture(Key.S, KeyModifiers.Meta)
+        : new KeyGesture(Key.S, KeyModifiers.Control);
+
     public string SettingsShortcut => OperatingSystem.IsMacOS() ? "⌘S" : "Ctrl-S";
+
     public KeyGesture CopyUsernameGesture => OperatingSystem.IsMacOS()
-                                                 ? new KeyGesture(Key.U, KeyModifiers.Meta)
-                                                 : new KeyGesture(Key.U, KeyModifiers.Control);
+        ? new KeyGesture(Key.U, KeyModifiers.Meta)
+        : new KeyGesture(Key.U, KeyModifiers.Control);
+
     public string SyncShortcut => OperatingSystem.IsMacOS() ? "⌘R" : "Ctrl-R";
+
     public KeyGesture SyncGesture => OperatingSystem.IsMacOS()
-                                                 ? new KeyGesture(Key.R, KeyModifiers.Meta)
-                                                 : new KeyGesture(Key.R, KeyModifiers.Control);
+        ? new KeyGesture(Key.R, KeyModifiers.Meta)
+        : new KeyGesture(Key.R, KeyModifiers.Control);
+
     public string CopyUsernameShortcut => OperatingSystem.IsMacOS() ? "⌘U" : "Ctrl-U";
+
     public KeyGesture CopyPasswordGesture => OperatingSystem.IsMacOS()
-                                                 ? new KeyGesture(Key.P, KeyModifiers.Meta)
-                                                 : new KeyGesture(Key.P, KeyModifiers.Control);
+        ? new KeyGesture(Key.P, KeyModifiers.Meta)
+        : new KeyGesture(Key.P, KeyModifiers.Control);
+
     public string CopyPasswordShortcut => OperatingSystem.IsMacOS() ? "⌘P" : "Ctrl-P";
+
     public KeyGesture Copy2FaGesture => OperatingSystem.IsMacOS()
-                                            ? new KeyGesture(Key.T, KeyModifiers.Meta)
-                                            : new KeyGesture(Key.T, KeyModifiers.Control);
+        ? new KeyGesture(Key.T, KeyModifiers.Meta)
+        : new KeyGesture(Key.T, KeyModifiers.Control);
+
     public string Copy2FaShortcut => OperatingSystem.IsMacOS() ? "⌘T" : "Ctrl-T";
+
     public KeyGesture CopyNotesGesture => OperatingSystem.IsMacOS()
-                                            ? new KeyGesture(Key.N, KeyModifiers.Meta)
-                                            : new KeyGesture(Key.N, KeyModifiers.Control);
+        ? new KeyGesture(Key.N, KeyModifiers.Meta)
+        : new KeyGesture(Key.N, KeyModifiers.Control);
+
     public string CopyNotesShortcut => OperatingSystem.IsMacOS() ? "⌘N" : "Ctrl-N";
     public bool ApplicationInitialized => _applicationController != null;
     public string SyncShortcutLabel => IsSyncing ? " Syncing..." : " Sync";
@@ -61,6 +78,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool CopyPasswordEnabled => SelectedCredential?.HasPassword == true;
     public bool Copy2FaEnabled => SelectedCredential?.HasTotp == true;
     public bool CopyNotesEnabled => SelectedCredential?.HasNotes == true;
+
     public string SearchBoxQuery
     {
         get => _searchBoxQuery;
@@ -69,20 +87,21 @@ public partial class MainWindowViewModel : ViewModelBase
             _searchBoxQuery = value;
             OnPropertyChanged();
             Credentials = _applicationController
-                          .Search(value)
-                          .Select(val => new CredentialListItem()
-                          {
-                              Name = val.Name,
-                              Username = val.Username,
-                              Id = val.Id,
-                              HasTotp = val.HasTotp,
-                              HasPassword = val.HasPassword,
-                              HasUsername = val.HasUsername,
-                              HasNotes = val.HasNotes,
-                          })
-                          .ToArray();
+                .Search(value)
+                .Select(val => new CredentialListItem
+                {
+                    Name = val.Name,
+                    Username = val.Username,
+                    Id = val.Id,
+                    HasTotp = val.HasTotp,
+                    HasPassword = val.HasPassword,
+                    HasUsername = val.HasUsername,
+                    HasNotes = val.HasNotes
+                })
+                .ToArray();
         }
     }
+
     public CredentialListItem[] Credentials
     {
         get => _credentials;
@@ -93,6 +112,7 @@ public partial class MainWindowViewModel : ViewModelBase
             SelectedCredential = value.Length > 0 ? value[0] : null;
         }
     }
+
     public CredentialListItem? SelectedCredential
     {
         get => _selectedCredential;
@@ -106,6 +126,7 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(CopyNotesEnabled));
         }
     }
+
     private bool IsSyncing
     {
         get => _isSyncing;
@@ -118,21 +139,13 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    public MainWindowViewModel(MainWindow mainWindow)
-    {
-        _mainWindow = mainWindow;
-    }
-
     [RelayCommand]
     public void KeyUp()
     {
         if (Credentials.Length < 1)
             return;
         var selectedCredentialIndex = Credentials.ToList().IndexOf(SelectedCredential);
-        if (selectedCredentialIndex > 0)
-        {
-            SelectedCredential = Credentials[selectedCredentialIndex - 1];
-        }
+        if (selectedCredentialIndex > 0) SelectedCredential = Credentials[selectedCredentialIndex - 1];
     }
 
     [RelayCommand]
@@ -142,9 +155,7 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         var selectedCredentialIndex = Credentials.ToList().IndexOf(SelectedCredential);
         if (selectedCredentialIndex < Credentials.Length - 1)
-        {
             SelectedCredential = Credentials[selectedCredentialIndex + 1];
-        }
     }
 
     [RelayCommand]
@@ -173,7 +184,7 @@ public partial class MainWindowViewModel : ViewModelBase
         await _mainWindow.Clipboard.SetTextAsync((await _applicationController.GetTotp(SelectedCredential.Id)).Code);
         Hide();
     }
-    
+
     [RelayCommand]
     public async Task CopyNotes()
     {
@@ -239,9 +250,9 @@ public partial class MainWindowViewModel : ViewModelBase
                 {
                     IsSyncing = false;
                     var box = MessageBoxManager.GetMessageBoxStandard("Error",
-                                                                      $"{ex.Message}\r\n\r\n${ex.StackTrace}",
-                                                                      ButtonEnum.Ok,
-                                                                      Icon.Error);
+                        $"{ex.Message}\r\n\r\n${ex.StackTrace}",
+                        ButtonEnum.Ok,
+                        Icon.Error);
                     await box.ShowWindowAsync();
                 });
             }

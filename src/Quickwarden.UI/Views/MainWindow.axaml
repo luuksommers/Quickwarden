@@ -1,6 +1,5 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:Quickwarden.UI.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:Quickwarden.UI.ViewModels"
@@ -52,13 +51,13 @@
     </Window.Styles>
 
     <Grid>
-        <Rectangle Opacity="0.75" Fill="White"></Rectangle>
+        <Rectangle Opacity="0.75" Fill="White" />
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="*"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <TextBox Text="{Binding SearchBoxQuery}" IsEnabled="{Binding ApplicationInitialized}" BorderThickness="0"
                      Margin="8" Name="SearchBox" Watermark="{Binding SearchBoxWatermark}" TextWrapping="NoWrap"
@@ -66,39 +65,42 @@
                 <TextBox.KeyBindings>
                     <KeyBinding Gesture="Up" Command="{Binding KeyUpCommand, Mode=OneWay}" />
                     <KeyBinding Gesture="Down" Command="{Binding KeyDownCommand, Mode=OneWay}" />
-                    <KeyBinding Gesture="{Binding CopyUsernameGesture}" Command="{Binding CopyUsernameCommand, Mode=OneWay}" />
-                    <KeyBinding Gesture="{Binding CopyPasswordGesture}" Command="{Binding CopyPasswordCommand, Mode=OneWay}" />
+                    <KeyBinding Gesture="{Binding CopyUsernameGesture}"
+                                Command="{Binding CopyUsernameCommand, Mode=OneWay}" />
+                    <KeyBinding Gesture="{Binding CopyPasswordGesture}"
+                                Command="{Binding CopyPasswordCommand, Mode=OneWay}" />
                     <KeyBinding Gesture="{Binding Copy2FaGesture}" Command="{Binding Copy2FaCommand, Mode=OneWay}" />
                     <KeyBinding Gesture="{Binding CopyNotesGesture}" Command="{Binding CopyNotesCommand, Mode=OneWay}" />
                 </TextBox.KeyBindings>
                 <Interaction.Behaviors>
-                    <FocusOnAttachedBehavior></FocusOnAttachedBehavior>
+                    <FocusOnAttachedBehavior />
                 </Interaction.Behaviors>
             </TextBox>
-            <ListBox Focusable="False" IsTabStop="False" Name="SearchResults" ItemsSource="{Binding Credentials}" SelectedItem="{Binding SelectedCredential}" Grid.Row="1">
+            <ListBox Focusable="False" IsTabStop="False" Name="SearchResults" ItemsSource="{Binding Credentials}"
+                     SelectedItem="{Binding SelectedCredential}" Grid.Row="1">
                 <ListBox.Styles>
                     <Style Selector="ListBoxItem">
-                        <Setter Property="Focusable" Value="False"/>
+                        <Setter Property="Focusable" Value="False" />
                     </Style>
                 </ListBox.Styles>
             </ListBox>
             <StackPanel Margin="8 8 8 0" Grid.Row="2" Orientation="Horizontal">
                 <TextBlock IsVisible="{Binding CopyUsernameEnabled}" FontSize="13" Margin="8"
                            VerticalAlignment="Center">
-                    <Run Foreground="#888" Text="{Binding CopyUsernameShortcut}"></Run>
+                    <Run Foreground="#888" Text="{Binding CopyUsernameShortcut}" />
                     <Span> Copy username</Span>
                 </TextBlock>
                 <TextBlock IsVisible="{Binding CopyPasswordEnabled}" FontSize="13" Margin="8"
                            VerticalAlignment="Center">
-                    <Run Foreground="#888" Text="{Binding CopyPasswordShortcut}"></Run>
+                    <Run Foreground="#888" Text="{Binding CopyPasswordShortcut}" />
                     <Span> Copy password</Span>
                 </TextBlock>
                 <TextBlock IsVisible="{Binding Copy2FaEnabled}" FontSize="13" Margin="8" VerticalAlignment="Center">
-                    <Run Foreground="#888" Text="{Binding Copy2FaShortcut}"></Run>
+                    <Run Foreground="#888" Text="{Binding Copy2FaShortcut}" />
                     <Span> Copy 2FA</Span>
                 </TextBlock>
                 <TextBlock IsVisible="{Binding CopyNotesEnabled}" FontSize="13" Margin="8" VerticalAlignment="Center">
-                    <Run Foreground="#888" Text="{Binding CopyNotesShortcut}"></Run>
+                    <Run Foreground="#888" Text="{Binding CopyNotesShortcut}" />
                     <Span> Copy notes</Span>
                 </TextBlock>
             </StackPanel>
@@ -108,12 +110,12 @@
                     <Span> Hide</Span>
                 </TextBlock>
                 <TextBlock FontSize="13" Margin="8" VerticalAlignment="Center">
-                    <Run Foreground="#888" Text="{Binding SettingsShortcut}"></Run>
+                    <Run Foreground="#888" Text="{Binding SettingsShortcut}" />
                     <Span> Settings...</Span>
                 </TextBlock>
                 <TextBlock FontSize="13" Margin="8" VerticalAlignment="Center">
-                    <Run Foreground="#888" Text="{Binding SyncShortcut}"></Run>
-                    <Run Foreground="{Binding SyncLabelColor}" Text="{Binding SyncShortcutLabel}"></Run>
+                    <Run Foreground="#888" Text="{Binding SyncShortcut}" />
+                    <Run Foreground="{Binding SyncLabelColor}" Text="{Binding SyncShortcutLabel}" />
                 </TextBlock>
             </StackPanel>
         </Grid>
